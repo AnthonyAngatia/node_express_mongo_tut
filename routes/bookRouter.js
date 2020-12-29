@@ -21,19 +21,66 @@ function routes(Book){
                 return res.json(books);
             });
         });
+    //*Middleware
+    bookRouter.use('/books/:bookId', (req, res, next) => {
+        Book.findById(req.params.bookId, (err, book) => {
+            if(err){
+                return res.send(err);
+            }
+            if(book){
+                req.book = book;
+                return next();
+            }
+            return res.sendStatus(404)
+        });
+    })
 
 //Getting a single book
     bookRouter.route('/books/:bookId')
-        .get((req, res) =>{
-            Book.findById(req.params.bookId, (err, books) => {
+        .get((req, res, next) => res.json(req.book))
+        .put((req, res) =>{
+            const { book } = req;
+            book.title= req.body.title;
+            book.author= req.body.author;
+            book.genre= req.body.genre;
+            book.read= req.body.read;
+            book.save();
+            req.book.save((err) =>{
                 if(err){
                     return res.send(err);
                 }
-                return res.json(books);
+                return res.json(book);
             });
-        });
+        })
+        .patch((req, res) => {
+            const { book } = req;
+            if(req.body._id){
+                delete req.body._id;
+            }
+            //Console.log(Objecct.entries(req.body);//Try to see what it is
+            Object.entries(req.body).forEach((item) => {
+                const key = item[0];
+                const value = item[1];
+                book[key] = value;
+            });
+            req.book.save((err) =>{
+                if(err){
+                    return res.send(err);
+                }
+                return res.json(book);
+            });
 
-return bookRouter;
+        })
+        .delete(((req, res) => {
+            req.book.remove((err) => {
+                if(err){
+                    return res.send(err);
+                }
+                return res.sendStatus(204);
+            })
+
+        }))
+    return bookRouter;
 }
 
 module.exports = routes;
