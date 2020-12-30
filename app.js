@@ -3,13 +3,15 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
 const app = express();
+
+console.log(process.env.ENV);
 if(process.env.ENV === 'Test'){
     console.log("This is a test");
-    const db = mongoose.connect('mongodb://localhost/bookAPI-test');
+    const db = mongoose.connect('mongodb://localhost/bookAPI_test');
 
 }else{
     console.log("This is real")
-    const db = mongoose.connect('mongodb://localhost/bookAPI-prod');
+    const db = mongoose.connect('mongodb://localhost/bookAPI');
 
 }
 const port = process.env.PORT || 3000;
